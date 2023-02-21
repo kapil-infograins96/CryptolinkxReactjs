@@ -112,3 +112,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         except Exception as exception:
             print(exception)
             
+
+class Send_OTPSerializer(serializers.ModelSerializer):
+    pass
+
