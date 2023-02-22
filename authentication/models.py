@@ -16,8 +16,7 @@ class KYC(models.Model):
     doc_back_img = models.ImageField(null = True, blank = True) 
     doc_selfie = models.ImageField(null = True, blank = True)
 
-    def __str__(self):
-        return f'{self.id_number}-------->{self.user}'
+   
 
 class Email_OTP(models.Model):
     user = models.ForeignKey(Custom_User, on_delete=models.CASCADE)
@@ -25,7 +24,8 @@ class Email_OTP(models.Model):
     otp = models.IntegerField()
 
     def __str__(self):
-        return f'{self.email} with {self.otp}'
+        return f'{self.email} __________________ {self.otp}'
+
 
 
 

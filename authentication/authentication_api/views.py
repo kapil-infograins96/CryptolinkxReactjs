@@ -16,7 +16,7 @@ from django.template.loader import render_to_string
 
 from django.conf import settings
 from django.utils.html import strip_tags
-from authentication.models import Email_OTP
+from authentication.models import Email_OTP,KYC
 
 
 
@@ -98,12 +98,12 @@ class Send_OTP(APIView):
            
 
             context = {
-                'status':status.HTTP_200_OK,
+                'status':status.HTTP_201_CREATED,
                 'success':True,
                 'message':'OTP Sent on your Email'
 
             }
-            return Response(context, status=status.HTTP_200_OK)
+            return Response(context, status=status.HTTP_201_CREATED     )
 
 
         except Exception as E:
@@ -132,15 +132,19 @@ class Check_OTP(APIView):
             print(type(post_otp))
             
             if user_otp == post_otp:
-                get_otp = Custom_User.objects.get(user = get_user)
-                print(get_otp)
-
-                get_otp.is_otp_verified = True
-
-                get_otp.save()
+                get_user = Custom_User.objects.get(email = get_user)
+                get_user.is_otp_verified = True
+                get_user.save()
+                get_otp.delete()
 
             else:
-                print("failed")
+                context = {
+                'status':status.HTTP_401_UNAUTHORIZED,
+                'success':False,
+                'message':"Invalid OTP"
+                }
+
+                return Response(context, status=status.HTTP_401_UNAUTHORIZED)
 
 
             context = {
@@ -160,3 +164,41 @@ class Check_OTP(APIView):
 
             }
             return Response(context, status=status.HTTP_401_UNAUTHORIZED)
+
+class User_KYC_View(APIView):
+    def post(self, request, *args, **kwargs):
+        
+        try:
+            token = request.META.get('HTTP_AUTHORIZATION', " ").split(' ')[1]
+            valid_data = TokenBackend(algorithm='HS256').decode(token,verify=False)
+            get_logged_in_user = valid_data['user_id']
+            get_user = Custom_User.objects.get(id=get_logged_in_user)
+
+            user = get_user.id
+            document_type = request.POST.get('document_type')
+            id_number = request.POST.get('id_number')
+            kyc_front_pic = request.FILES.get('kyc_front_pic')
+            kyc_back_pic = request.FILES.get('kyc_back_pic')
+            kyc_selfie = request.FILES.get('kyc_selfie')
+                                
+            kyc_obj = KYC(user_id = user, document_type = document_type, id_number = id_number, doc_front_img = kyc_front_pic, doc_back_img = kyc_back_pic, doc_selfie = kyc_selfie)
+            kyc_obj.save()
+
+            context = {
+                'status':status.HTTP_200_OK,
+                'success':True,
+                'message':'Documents Verification process is ongoing'
+
+            }
+            return Response(context, status=status.HTTP_200_OK)
+
+        except Exception as E:
+            context = {
+                'status':status.HTTP_401_UNAUTHORIZED,
+                'success':False,
+                'message':str(E)
+
+            }
+            return Response(context, status=status.HTTP_401_UNAUTHORIZED)
+
+                

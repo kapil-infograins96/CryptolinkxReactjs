@@ -16,4 +16,54 @@ class Wallet(models.Model):
     money = models.FloatField()
     Currency_type = models.ForeignKey(Currency, on_delete=models.CASCADE)
 
+
+# Chose = (
+#     ('Buy','Buy'),
+#     ('Sell','Sell')
+# )
+
+# class Crypto_Wallets(models.Model):
+#     user = models.ForeignKey(Custom_User, on_delete=models.CASCADE)
+#     type = models.CharField(max_length = 20, choices = Chose ,default = 'Buy')
+#     crypto_name = models.CharField(max_length=50)
+#     crypto_price = models.FloatField()
+#     quantity = models.FloatField()
+#     invested_rs = models.FloatField()
+
+#     class Meta:
+#         verbose_name = 'Crypto_Wallet'
+
+#     def __str__(self):
+#         return self.user.email
+        
+        
+Order_chose = (
+    ('Completed','Completed'),
+    ('Pending','Pending'),
+    ('Cancel','Cancel')
+)
+
+Chose = (
+     ('Buy','Buy'),
+     ('Sell','Sell')
+ )
+
+class Order(models.Model):
+    user = models.ForeignKey(Custom_User, on_delete=models.CASCADE)
+    type = models.CharField(max_length = 20, choices = Chose ,default = 'Buy')
+    crypto_name = models.CharField(max_length=50)
+    crypto_price = models.FloatField()
+    quantity = models.FloatField()
+    invested_rs = models.FloatField()
+    fee = models.FloatField()
+    status = models.CharField(max_length=50,choices=Order_chose,default='Cancel')
+    time = models.DateTimeField(auto_now_add=True)
+
+    
+        
+
+
+
+
+
     

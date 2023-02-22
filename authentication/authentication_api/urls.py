@@ -5,7 +5,8 @@ from .views import (
     RegisterView,
     MyObtainTokenPairView,
     Send_OTP,
-    Check_OTP
+    Check_OTP,
+    User_KYC_View
 )
 
 urlpatterns = [
@@ -13,7 +14,8 @@ urlpatterns = [
     path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('register/', RegisterView.as_view(), name='auth_register'),
     path('Otp_sent/',Send_OTP.as_view(), name = "sent-otp"),
-    path('verify_otp/',Check_OTP.as_view(), name = "verify-otp")
+    path('verify_otp/',Check_OTP.as_view(), name = "verify-otp"),
+    path('kyc_verification/',User_KYC_View.as_view(), name="kyc")
    
 
 ]
