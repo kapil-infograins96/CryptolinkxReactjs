@@ -59,8 +59,23 @@ class Order(models.Model):
     status = models.CharField(max_length=50,choices=Order_chose,default='Cancel')
     time = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f'{self.crypto_name} - {self.user}'
     
-        
+
+    
+class Crypto_wallet(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    quantity = models.FloatField()
+    invested = models.FloatField() 
+
+    def __str__(self):
+        return f'{self.order}'
+    
+
+   
+    
+
 
 
 

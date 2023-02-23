@@ -4,8 +4,8 @@ from requests import Request, Session
 import json
 from rest_framework import status
 from rest_framework.response import Response
-from core.models import Wallet
-from core.core_api.serializers import WalletSerializer
+from core.models import Wallet, Order, Crypto_wallet
+from core.core_api.serializers import WalletSerializer, BuySerializer
 from account.models import Custom_User
 from rest_framework_simplejwt.backends import TokenBackend
 
@@ -92,4 +92,103 @@ class WalletAPi(APIView):
                     "response":str(e)
                     }
             return Response(context)
+
+
+class Buy_CryptoAPI(APIView):
+    def post(self, request, *args, **kwargs):
+        try:
+            token = request.META.get('HTTP_AUTHORIZATION', " ").split(' ')[1]
+            valid_data = TokenBackend(algorithm='HS256').decode(token,verify=False)
+            get_logged_in_user = valid_data['user_id']
+            
+            get_user = Custom_User.objects.get(id=get_logged_in_user)
+
+            if get_user:
+           
+                serializer = BuySerializer(data=request.data)
+                if serializer.is_valid():
+                    serializer.save()
+                    get_order_id = Order.objects.filter(user = get_user, type = "Buy" , status = "Completed" ) 
+                    print(get_order_id)
+                    print("================================")
+                    if get_order_id:
+                        get_latest_order = Order.objects.filter(user = get_user).last()
+                        
+                        quantity = get_latest_order.quantity
+                        invested = get_latest_order.invested_rs
+                        
+
+                        
+                        
+                        for i in get_order_id:
+                            get_wallet = Crypto_wallet.objects.filter(order__crypto_name = i.crypto_name).exists()
+                            get_wallet_attr = Crypto_wallet.objects.filter(order__crypto_name = i.crypto_name).first()
+                            
+
+                        
+                        if get_wallet :
+                            pre_quantity = get_wallet_attr.quantity
+                            pre_invested = get_wallet_attr.invested
+                            print("phle wali values")
+                            print(pre_quantity)
+                            print(pre_invested)
+                            
+
+
+                            total_quantity  = pre_quantity + quantity
+                            total_invested = pre_invested + invested
+                            
+
+                            get_wallet_attr.quantity = total_quantity
+                            get_wallet_attr.invested = total_invested
+                            get_wallet_attr.save()
+                            
+
+                        else:
+                            
+                            print("working")
+                            wallet_create = Crypto_wallet(order_id = i.id, quantity = quantity, invested = invested)
+                            print(wallet_create)
+                            wallet_create.save()
+                        
+
+                    content = {
+                
+                    "status":status.HTTP_201_CREATED,
+                    "success":True,
+                    "response":"sucess",
+                    }
+                    return Response(content,status=status.HTTP_201_CREATED)
+
+                
+
+        except Exception as e:
+            context = {
+                    "status":status.HTTP_400_BAD_REQUEST,
+                    "success": False,
+                    "response":str(e)
+                    }
+            return Response(context)
+                   
+                       
+                    
+                        
+
+                       
+                        
+
+
+                
+                
+                    
+                        
+
+                       
+                        
+
+
+class Sell_CryptoAPI(APIView):
+    def post(self, request, *args, **kwargs):
+        pass
+
 
