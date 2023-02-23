@@ -65,7 +65,8 @@ class Order(models.Model):
 
     
 class Crypto_wallet(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    user = models.ForeignKey(Custom_User, on_delete=models.CASCADE,null=True)
+    crypto_name = models.CharField(max_length=50,null=True,blank=True)
     quantity = models.FloatField()
     invested = models.FloatField() 
 

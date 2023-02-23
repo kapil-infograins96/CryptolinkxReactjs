@@ -108,21 +108,24 @@ class Buy_CryptoAPI(APIView):
                 serializer = BuySerializer(data=request.data)
                 if serializer.is_valid():
                     serializer.save()
-                    get_order_id = Order.objects.filter(user = get_user, type = "Buy" , status = "Completed" ) 
-                    print(get_order_id)
-                    print("================================")
+                    get_order_id = Order.objects.filter(user = get_user, type = "Buy" , status = "Completed") 
+                    
+
+                    
                     if get_order_id:
+                        print("buy wala")
                         get_latest_order = Order.objects.filter(user = get_user).last()
                         
                         quantity = get_latest_order.quantity
                         invested = get_latest_order.invested_rs
+                        crypto_name = get_latest_order.crypto_name
                         
 
                         
                         
                         for i in get_order_id:
-                            get_wallet = Crypto_wallet.objects.filter(order__crypto_name = i.crypto_name).exists()
-                            get_wallet_attr = Crypto_wallet.objects.filter(order__crypto_name = i.crypto_name).first()
+                            get_wallet = Crypto_wallet.objects.filter(crypto_name = i.crypto_name).exists()
+                            get_wallet_attr = Crypto_wallet.objects.filter(crypto_name = i.crypto_name).first()
                             
 
                         
@@ -143,14 +146,24 @@ class Buy_CryptoAPI(APIView):
                             get_wallet_attr.invested = total_invested
                             get_wallet_attr.save()
                             
-
                         else:
-                            
-                            print("working")
-                            wallet_create = Crypto_wallet(order_id = i.id, quantity = quantity, invested = invested)
-                            print(wallet_create)
+                            wallet_create = Crypto_wallet(user_id = get_user.id, quantity = quantity, invested = invested, crypto_name = crypto_name)
                             wallet_create.save()
-                        
+
+                            
+                    
+                   
+
+
+                    else:
+
+                        context = {
+                                "status":status.HTTP_400_BAD_REQUEST,
+                                "success": False,
+                                "response":"sell or without oompleted order"
+                                }
+                        return Response(context)
+
 
                     content = {
                 
@@ -159,8 +172,64 @@ class Buy_CryptoAPI(APIView):
                     "response":"sucess",
                     }
                     return Response(content,status=status.HTTP_201_CREATED)
+        
+        
+        except Exception as e:
+            context = {
+                    "status":status.HTTP_400_BAD_REQUEST,
+                    "success": False,
+                    "response":str(e)
+                    }
+            return Response(context)
 
-                
+
+class Sell_CryptoAPI(APIView):
+    def post(self, request, *args, **kwargs):
+        try:
+            token = request.META.get('HTTP_AUTHORIZATION', " ").split(' ')[1]
+            valid_data = TokenBackend(algorithm='HS256').decode(token,verify=False)
+            get_logged_in_user = valid_data['user_id']
+            
+            get_user = Custom_User.objects.get(id=get_logged_in_user)
+
+            if get_user:
+           
+                serializer = BuySerializer(data=request.data)
+                if serializer.is_valid():
+                    serializer.save()
+                    get_order_id = Order.objects.filter(user = get_user, type = "Sell" , status = "Completed") 
+
+                    if get_order_id:
+                        get_latest_order = Order.objects.filter(user = get_user).last()
+                        quantity = get_latest_order.quantity
+                        invested = get_latest_order.invested_rs
+                        crypto_name = get_latest_order.crypto_name
+                        print("=============post quantity============")
+                        print(quantity)
+                        print(type(quantity))
+                        for i in get_order_id:
+                            get_wallet = Crypto_wallet.objects.filter(crypto_name = i.crypto_name).exists()
+                            get_wallet_attr = Crypto_wallet.objects.filter(crypto_name = i.crypto_name).first()
+
+                        if get_wallet :
+                            pre_quantity = get_wallet_attr.quantity
+                            pre_invested = get_wallet_attr.invested
+                            print("=============pre wallet quantity============")
+                            print(pre_quantity)
+                            print(type(pre_quantity))
+
+
+                            if pre_quantity <= quantity:
+                                print("ho gya")
+
+
+
+
+
+
+
+
+
 
         except Exception as e:
             context = {
@@ -169,8 +238,22 @@ class Buy_CryptoAPI(APIView):
                     "response":str(e)
                     }
             return Response(context)
+                            
+
+
+
+
+
+
+
+
+                
+
                    
                        
+
+
+        
                     
                         
 
@@ -185,10 +268,5 @@ class Buy_CryptoAPI(APIView):
 
                        
                         
-
-
-class Sell_CryptoAPI(APIView):
-    def post(self, request, *args, **kwargs):
-        pass
 
 

@@ -10,7 +10,7 @@ class WalletAdmin(admin.ModelAdmin):
 
 class Crypto_walletAdmin(admin.ModelAdmin):
     model =Crypto_wallet
-    list_display  = ['order','quantity','invested']
+    list_display  = ['user','crypto_name','quantity','invested']
 
 class OrderAdmin(admin.ModelAdmin):
     model = Order
