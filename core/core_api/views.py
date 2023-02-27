@@ -5,7 +5,7 @@ import json
 from rest_framework import status
 from rest_framework.response import Response
 from core.models import Wallet, Order, Crypto_wallet
-from core.core_api.serializers import WalletSerializer, BuySerializer
+from core.core_api.serializers import WalletSerializer, BuySerializer, CryptoSerializer
 from account.models import Custom_User
 from rest_framework_simplejwt.backends import TokenBackend
 
@@ -49,11 +49,11 @@ class ExchangeViewAPI(APIView):
             return Response(context)
 
         
-        except Exception as Exception:
+        except Exception as e:
             context = {
                     "status":status.HTTP_400_BAD_REQUEST,
                     "success": False,
-                    "response":str(Exception)
+                    "response":str(e)
                     }
 
             return Response(context)
@@ -69,10 +69,7 @@ class WalletAPi(APIView):
             get_user = Custom_User.objects.get(id=get_logged_in_user)
 
             get_wallet_details = Wallet.objects.get(user_id = get_user.id)
-            print(get_wallet_details)
-            print(get_wallet_details.user)
-            print(get_wallet_details.Currency_type)
-            print(get_wallet_details.money)
+            
 
 
             serializer = WalletSerializer(get_wallet_details)
@@ -151,16 +148,12 @@ class Buy_CryptoAPI(APIView):
                             wallet_create.save()
 
                             
-                    
-                   
-
-
                     else:
 
                         context = {
                                 "status":status.HTTP_400_BAD_REQUEST,
                                 "success": False,
-                                "response":"sell or without oompleted order"
+                                "response":"sell or without completed order"
                                 }
                         return Response(context)
 
@@ -181,6 +174,10 @@ class Buy_CryptoAPI(APIView):
                     "response":str(e)
                     }
             return Response(context)
+                    
+                   
+
+
 
 
 class Sell_CryptoAPI(APIView):
@@ -219,16 +216,23 @@ class Sell_CryptoAPI(APIView):
                             print(type(pre_quantity))
 
 
-                            if pre_quantity <= quantity:
-                                print("ho gya")
+                            if quantity <= pre_quantity  :
+                                total_quantity = pre_quantity -quantity
 
+                                
+                                get_remain = Crypto_wallet.objects.get(id = get_user.id)
+                                get_remain.quantity = total_quantity
+                                get_remain.save()
+                                # print(crypto_total_quantity.quantity)
+                                # print(type(crypto_total_quantity.quantity))
 
-
-
-
-
-
-
+                            content = {
+                
+                            "status":status.HTTP_201_CREATED,
+                            "success":True,
+                            "response":"sucess",
+                            }
+                            return Response(content,status=status.HTTP_201_CREATED)
 
 
         except Exception as e:
@@ -239,6 +243,41 @@ class Sell_CryptoAPI(APIView):
                     }
             return Response(context)
                             
+
+
+class CryptoWalletDetailsAPI(APIView):
+    def get(self,request,*args, **kwargs):
+        try:
+            token = request.META.get('HTTP_AUTHORIZATION', " ").split(' ')[1]
+            valid_data = TokenBackend(algorithm='HS256').decode(token,verify=False)
+            get_logged_in_user = valid_data['user_id']
+            
+            get_user = Custom_User.objects.get(id=get_logged_in_user)
+
+            get_details = Crypto_wallet.objects.get(id = get_user.id)
+            serializer = CryptoSerializer(get_details)
+            
+            content = {
+           
+            "status":status.HTTP_200_OK,
+            "success":True,
+            "response":serializer.data,
+            }
+            return Response(content,status=status.HTTP_200_OK)
+
+        except Exception as e:
+            context = {
+                    "status":status.HTTP_400_BAD_REQUEST,
+                    "success": False,
+                    "response":str(e)
+                    }
+            return Response(context)
+
+
+
+
+
+
 
 
 

@@ -71,7 +71,7 @@ class Crypto_wallet(models.Model):
     invested = models.FloatField() 
 
     def __str__(self):
-        return f'{self.order}'
+        return f'{self.user}'
     
 
    
