@@ -21,7 +21,7 @@ class ExchangeViewAPI(APIView):
             url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
             headers = {
                 'Accepts': 'application/json',
-                'X-CMC_PRO_API_KEY': '49ac0cae-a97f-4a9e-a5f6-5e8a64fe39eb'
+                'X-CMC_PRO_API_KEY': '2611cc8a-7f40-48ca-9005-51f4f74f5613'
                 
                 
 
